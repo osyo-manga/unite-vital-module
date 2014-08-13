@@ -49,18 +49,7 @@ endfunction
 
 
 function! vital_module#get_installed_modules(...)
-	let dir = get(a:, 1, getcwd())
-	try
-		let cwd = getcwd()
-		execute "lcd" fnameescape(dir)
-		let vital_file = get(split(glob('autoload/vital/*.vital'), "\n"), 0, "")
-		if !filereadable(vital_file)
-			return []
-		endif
-		return readfile(vital_file)[3 : ]
-	finally
-		execute "lcd" fnameescape(cwd)
-	endtry
+  return sort(s:L.uniq(filter(map(split(glob('autoload/vital/*/**', 1), "\n"), 's:file2module(v:val)'), 'len(v:val) && s:is_module_name(v:val)')))
 endfunction
 
 
