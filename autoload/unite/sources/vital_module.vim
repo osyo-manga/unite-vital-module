@@ -37,7 +37,7 @@ let s:source = {
 \			"is_selectable" : 1,
 \		},
 \		"delete" : {
-\			"is_selectable" : 0,
+\			"is_selectable" : 1,
 \		},
 \	},
 \	"default_action" : "add"
@@ -53,8 +53,7 @@ endfunction
 
 
 function! s:source.action_table.delete.func(candidates)
-" 	let modules = "-" . join(map(a:candidates, 'v:val.action__vital_module'), ' +')
-	let modules = a:candidates.action__vital_module
+	let modules = "-" . join(map(a:candidates, 'v:val.action__vital_module'), ' +')
 	if unite#util#input_yesno("Remove " . string(modules))
 		execute "Vitalize . " . modules
 	endif
