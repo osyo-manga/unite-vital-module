@@ -17,16 +17,23 @@ endfunction
 
 function! s:module_candidates(...)
 	let path = get(a:, 1, getcwd())
-	let installed = s:installed_modules()
-	let modules   = s:L.uniq(sort(installed + s:v_modules()))
-	return map(modules, '{
-\		"word" : index(installed, v:val) == -1 ? ("  " . v:val) : ("@ " . v:val),
-\		"action__path" : vital_module#module2file(v:val),
-\		"action__vitalize_path" : path,
-\		"action__vital_module" : v:val,
-\		"kind" : "file",
-\		"default_action" : "add"
-\	}')
+	let old_path = getcwd()
+	try
+		execute "lcd" path
+		let installed = s:installed_modules()
+		let modules   = s:L.uniq(sort(installed + s:v_modules()))
+		return map(modules, '{
+	\		"word" : index(installed, v:val) == -1 ? ("  " . v:val) : ("@ " . v:val),
+	\		"action__path" : vital_module#module2file(v:val),
+	\		"action__vitalize_path" : path,
+	\		"action__vital_module" : v:val,
+	\		"kind" : "file",
+	\		"default_action" : "add",
+	\		"action__root" : getcwd(),
+	\	}')
+	finally
+		execute "lcd" old_path
+	endtry
 endfunction
 
 
@@ -45,27 +52,37 @@ let s:source = {
 
 
 function! s:source.action_table.add.func(candidates)
-	let modules = "+" . join(map(a:candidates, 'v:val.action__vital_module'), ' +')
+	let modules = "+" . join(map(copy(a:candidates), 'v:val.action__vital_module'), ' +')
 	if unite#util#input_yesno("Install " . string(modules))
-		execute "Vitalize . " . modules
+		try
+			let old_path = getcwd()
+			execute "lcd" a:candidates[0].action__root
+			execute "Vitalize . " . modules
+		finally
+			execute "lcd" old_path
+		endtry
 	endif
 endfunction
 
 
 function! s:source.action_table.delete.func(candidates)
-	let modules = "-" . join(map(a:candidates, 'v:val.action__vital_module'), ' +')
+	let modules = "-" . join(map(copy(a:candidates), 'v:val.action__vital_module'), ' -')
 	if unite#util#input_yesno("Remove " . string(modules))
-		execute "Vitalize . " . modules
+		try
+			let old_path = getcwd()
+			execute "lcd" a:candidates[0].action__root
+			execute "Vitalize . " . modules
+		finally
+			execute "lcd" old_path
+		endtry
 	endif
-" 	let modules = "-" . join(map(a:candidates, 'v:val.action__vital_module'), ' +')
-" 	echom "Vitalize . " . modules
-" 	execute "Vitalize . " . modules
 endfunction
 
 
 function! s:source.gather_candidates(args, context)
 	call unite#print_source_message( '@: installed', self.name)
-	let path = a:context.path == "" ? "." : a:context.path
+	let path = get(a:args, 0, ".")
+" 	let path = a:context.path == "" ? "." : matchstr(a:context.path, '.*\ze/')
 	return s:module_candidates(path)
 endfunction
 
