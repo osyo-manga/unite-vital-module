@@ -5,6 +5,7 @@ set cpo&vim
 
 let s:L = vital_module#get_vital_DataList()
 
+
 function! s:v_modules()
 	return vital_module#get_all()
 endfunction
@@ -57,6 +58,10 @@ function! s:source.action_table.add.func(candidates)
 		try
 			let old_path = getcwd()
 			execute "lcd" a:candidates[0].action__root
+			if !vital_module#has_vital()
+				let name = input("Input --name=")
+				let modules = modules . " --name=" . name
+			endif
 			execute "Vitalize . " . modules
 		finally
 			execute "lcd" old_path

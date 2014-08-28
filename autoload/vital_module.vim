@@ -12,6 +12,11 @@ function! vital_module#get_vital_DataList()
 endfunction
 
 
+function! vital_module#has_vital(...)
+	let root = get(a:, 1, getcwd())
+	return filereadable(root . "/autoload/vital.vim")
+endfunction
+
 
 function! s:is_camel_case(str)
   return !empty(matchstr(a:str, '^\%([0-9A-Z]\l*\)\+$'))
