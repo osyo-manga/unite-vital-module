@@ -59,7 +59,7 @@ function! s:source.action_table.add.func(candidates)
 			let old_path = getcwd()
 			execute "lcd" a:candidates[0].action__root
 			if !vital_module#has_vital()
-				let name = input("Input --name=")
+				let name = input("Input vitalize name:")
 				let modules = modules . " --name=" . name
 			endif
 			execute "Vitalize . " . modules
