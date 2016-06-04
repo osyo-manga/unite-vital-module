@@ -43,7 +43,7 @@ endfunction
 
 function! s:available_module_names(...)
   return sort(s:L.uniq(filter(map(split(globpath(&runtimepath,
-  \          'autoload/vital/__latest__/**/*.vim', 1), "\n"),
+  \          'autoload/vital/__*__/**/*.vim', 1), "\n"),
   \          's:file2module(v:val)'), 's:is_module_name(v:val)')))
 endfunction
 
